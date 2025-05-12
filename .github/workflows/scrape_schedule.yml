@@ -1,0 +1,42 @@
+name: Scheduled Scrapy Run
+
+on:
+  schedule:
+    # Runs daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  run_spiders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Use the Python version your project uses
+          cache: 'pip' # Cache dependencies
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Lincoln County Spider (Overwrite)
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          MONGO_COLLECTION: ${{ secrets.MONGO_COLLECTION }}
+        run: |
+          cd LincolnScraper 
+          scrapy crawl lincoln_county -s MONGO_URI="${MONGO_URI}" -s MONGO_DB="${MONGO_DB}" -s MONGO_COLLECTION="${MONGO_COLLECTION}" -s MONGO_OVERWRITE_COLLECTION=True
+
+      - name: Run CAB Minutes Spider (Append to cleared collection)
+        env:
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          MONGO_COLLECTION: ${{ secrets.MONGO_COLLECTION }}
+        run: |
+          cd LincolnScraper
+          scrapy crawl cab_minutes -s MONGO_URI="${MONGO_URI}" -s MONGO_DB="${MONGO_DB}" -s MONGO_COLLECTION="${MONGO_COLLECTION}" -s MONGO_OVERWRITE_COLLECTION=False 

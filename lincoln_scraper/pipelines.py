@@ -3,10 +3,11 @@ import logging
 
 class MongoPipeline:
 
-    def __init__(self, mongo_uri, mongo_db, mongo_collection):
+    def __init__(self, mongo_uri, mongo_db, mongo_collection, overwrite_collection):
         self.mongo_uri = mongo_uri
         self.mongo_db = mongo_db
         self.mongo_collection_name = mongo_collection
+        self.overwrite_collection = overwrite_collection # Store the setting
         self.client = None
         self.db = None
         self.collection = None
@@ -16,13 +17,25 @@ class MongoPipeline:
         return cls(
             mongo_uri=crawler.settings.get('MONGO_URI'),
             mongo_db=crawler.settings.get('MONGO_DB', 'scrapy_data'), # Default DB
-            mongo_collection=crawler.settings.get('MONGO_COLLECTION', 'scraped_documents') # Default collection
+            mongo_collection=crawler.settings.get('MONGO_COLLECTION', 'scraped_documents'), # Default collection
+            overwrite_collection=crawler.settings.getbool('MONGO_OVERWRITE_COLLECTION', False) # Get the overwrite setting (default False)
         )
 
     def open_spider(self, spider):
         try:
             self.client = pymongo.MongoClient(self.mongo_uri)
             self.db = self.client[self.mongo_db]
+            
+            # --- Drop collection if overwrite setting is True ---
+            if self.overwrite_collection:
+                logging.info(f"Overwriting enabled. Dropping collection: {self.mongo_collection_name} in DB: {self.mongo_db}")
+                self.db.drop_collection(self.mongo_collection_name)
+                # Reset overwrite flag after dropping once (important for multi-spider runs in same process)
+                # Although GitHub Actions runs each spider in a separate `scrapy crawl` command, 
+                # this prevents accidental drops if logic changes later.
+                self.overwrite_collection = False 
+            # ----------------------------------------------------
+
             self.collection = self.db[self.mongo_collection_name]
             logging.info(f"MongoDB connection established. DB: {self.mongo_db}, Collection: {self.mongo_collection_name}")
         except pymongo.errors.ConfigurationError as e:

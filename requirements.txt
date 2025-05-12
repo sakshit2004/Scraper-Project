@@ -1,1 +1,3 @@
-scrapy>=2.11.0
+Scrapy>=2.11 # Or your specific Scrapy version
+pymongo>=4.0 # Or your specific pymongo version
+brotli>=1.0 # Or your specific brotli version
