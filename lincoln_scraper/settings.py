@@ -49,13 +49,13 @@ DEFAULT_REQUEST_HEADERS = {
 # FEED_EXPORT_INCLUDE_HEADERS_LINE = True # Default to writing headers
 
 # MongoDB Settings
-MONGO_URI = "mongodb://localhost:27017/"  # IMPORTANT: Update with your MongoDB connection URI
-MONGO_DB = "scrapy_data"                # Optional: Or your preferred database name
-MONGO_COLLECTION = "lincoln_cab_documents" # Optional: Or your preferred collection name
-MONGO_OVERWRITE_COLLECTION = False         # Set to True to drop collection before inserting (e.g., for scheduled runs)
+MONGO_URI = "mongodb://localhost:27017/"
+MONGO_DB = "scrapy_data"
+MONGO_COLLECTION = "lincoln_cab_documents"
+MONGO_OVERWRITE_COLLECTION = False
 
 ITEM_PIPELINES = {
-   "lincoln_scraper.pipelines.MongoPipeline": 300, # Enable the pipeline, 300 is a typical priority
+   "lincoln_scraper.pipelines.MongoPipeline": 300,
 }
 
 COOKIES_ENABLED = True

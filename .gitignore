@@ -68,11 +68,8 @@ instance/
 
 # Scrapy stuff:
 .scrapy/
-httpcache/ # Cache directory enabled in settings.py
-# *.csv    # Output files (if not using DB pipeline)
-# *.json
-# *.jl
-*.log      # General log files
+httpcache/
+*.log
 
 # Environments
 .env

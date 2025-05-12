@@ -7,7 +7,7 @@ class MongoPipeline:
         self.mongo_uri = mongo_uri
         self.mongo_db = mongo_db
         self.mongo_collection_name = mongo_collection
-        self.overwrite_collection = overwrite_collection # Store the setting
+        self.overwrite_collection = overwrite_collection
         self.client = None
         self.db = None
         self.collection = None
@@ -16,9 +16,9 @@ class MongoPipeline:
     def from_crawler(cls, crawler):
         return cls(
             mongo_uri=crawler.settings.get('MONGO_URI'),
-            mongo_db=crawler.settings.get('MONGO_DB', 'scrapy_data'), # Default DB
-            mongo_collection=crawler.settings.get('MONGO_COLLECTION', 'scraped_documents'), # Default collection
-            overwrite_collection=crawler.settings.getbool('MONGO_OVERWRITE_COLLECTION', False) # Get the overwrite setting (default False)
+            mongo_db=crawler.settings.get('MONGO_DB', 'scrapy_data'),
+            mongo_collection=crawler.settings.get('MONGO_COLLECTION', 'scraped_documents'),
+            overwrite_collection=crawler.settings.getbool('MONGO_OVERWRITE_COLLECTION', False)
         )
 
     def open_spider(self, spider):
@@ -26,15 +26,10 @@ class MongoPipeline:
             self.client = pymongo.MongoClient(self.mongo_uri)
             self.db = self.client[self.mongo_db]
             
-            # --- Drop collection if overwrite setting is True ---
             if self.overwrite_collection:
                 logging.info(f"Overwriting enabled. Dropping collection: {self.mongo_collection_name} in DB: {self.mongo_db}")
                 self.db.drop_collection(self.mongo_collection_name)
-                # Reset overwrite flag after dropping once (important for multi-spider runs in same process)
-                # Although GitHub Actions runs each spider in a separate `scrapy crawl` command, 
-                # this prevents accidental drops if logic changes later.
                 self.overwrite_collection = False 
-            # ----------------------------------------------------
 
             self.collection = self.db[self.mongo_collection_name]
             logging.info(f"MongoDB connection established. DB: {self.mongo_db}, Collection: {self.mongo_collection_name}")
@@ -53,14 +48,10 @@ class MongoPipeline:
     def process_item(self, item, spider):
         if self.collection is None:
             logging.error("MongoDB collection not available. Item not processed.")
-            return item # Or raise DropItem
+            return item
         try:
-            # Make sure item is a dict (Scrapy items are dict-like but might need conversion)
             self.collection.insert_one(dict(item))
             logging.debug(f"Item inserted into MongoDB: {item}")
         except Exception as e:
             logging.error(f"Error inserting item into MongoDB: {e}")
-            # Decide if you want to drop the item or let it pass
-            # from scrapy.exceptions import DropItem
-            # raise DropItem(f"Failed to insert item into MongoDB: {item}")
         return item

@@ -29,7 +29,6 @@ jobs:
           MONGO_DB: ${{ secrets.MONGO_DB }}
           MONGO_COLLECTION: ${{ secrets.MONGO_COLLECTION }}
         run: |
-          cd LincolnScraper 
           scrapy crawl lincoln_county -s MONGO_URI="${MONGO_URI}" -s MONGO_DB="${MONGO_DB}" -s MONGO_COLLECTION="${MONGO_COLLECTION}" -s MONGO_OVERWRITE_COLLECTION=True
 
       - name: Run CAB Minutes Spider (Append to cleared collection)
@@ -38,5 +37,4 @@ jobs:
           MONGO_DB: ${{ secrets.MONGO_DB }}
           MONGO_COLLECTION: ${{ secrets.MONGO_COLLECTION }}
         run: |
-          cd LincolnScraper
           scrapy crawl cab_minutes -s MONGO_URI="${MONGO_URI}" -s MONGO_DB="${MONGO_DB}" -s MONGO_COLLECTION="${MONGO_COLLECTION}" -s MONGO_OVERWRITE_COLLECTION=False 
