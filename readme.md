@@ -87,4 +87,5 @@ This repository includes a GitHub Actions workflow (`.github/workflows/scrape_sc
 
 Data from both spiders is stored in the specified MongoDB collection (default: `lincoln_cab_documents` in the `scrapy_data` database). Each document represents a scraped meeting item and has the following structure:
 
-![image](https://github.com/user-attachments/assets/a7434211-0a8a-4efb-bb9c-aac13b5a408e)
+![image](https://github.com/user-attachments/assets/94d6bba9-406f-4d52-8ed2-1da91b24c66d)
+![image](https://github.com/user-attachments/assets/26d4d285-0d66-44ff-b228-856a1f6e3922)
